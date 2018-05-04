@@ -189,5 +189,6 @@ for x, y_, epoch in txt.rnn_minibatch_sequencer(codetext, BATCHSIZE, SEQLEN, nb_
     istate = ostate
     step += BATCHSIZE * SEQLEN
 
+saved_file = saver.save(sess, 'checkpoints/rnn_train_' + timestamp, global_step=step)
 print("Saved file: " + saved_file)
 
