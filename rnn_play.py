@@ -19,15 +19,20 @@ import my_txtutils
 
 # these must match what was saved !
 ALPHASIZE = my_txtutils.ALPHASIZE
-NLAYERS = 4
+NLAYERS = 5
 INTERNALSIZE = 512
+#a new commit
+
+shakespeareB10 = "checkpoints/rnn_train_1524647054-54784000"
+
+
 
 # use topn=10 for all but the last one which works with topn=2 for Shakespeare and topn=3 for Python
-author = "checkpoints/rnn_train_1495440473-102000000"
+author = shakespeareB10
 
 ncnt = 0
 with tf.Session() as sess:
-    new_saver = tf.train.import_meta_graph('checkpoints/rnn_train_1495455686-0.meta')
+    new_saver = tf.train.import_meta_graph('checkpoints/rnn_train_1524647054-54784000.meta')
     new_saver.restore(sess, author)
     x = my_txtutils.convert_from_alphabet(ord("L"))
     x = np.array([[x]])  # shape [BATCHSIZE, SEQLEN] with BATCHSIZE=1 and SEQLEN=1
@@ -37,7 +42,7 @@ with tf.Session() as sess:
     h = np.zeros([1, INTERNALSIZE * NLAYERS], dtype=np.float32)  # [ BATCHSIZE, INTERNALSIZE * NLAYERS]
     file = open("generated_output.txt", "w")
     file.write("Hi there, this a generated output poem from the shakespeare machine. have fun! \n\n")
-    for i in range(10000):
+    for i in range(1000):
         yo, h = sess.run(['Yo:0', 'H:0'], feed_dict={'X:0': y, 'pkeep:0': 1., 'Hin:0': h, 'batchsize:0': 1})
 
         # If sampling is be done from the topn most likely characters, the generated text
@@ -61,5 +66,6 @@ with tf.Session() as sess:
             file.write("")
             ncnt = 0
     file.close() 
+
 
 
