@@ -37,11 +37,11 @@ tf.set_random_seed(0)
 #         To see the curves drift apart ("overfitting") try to use an insufficient amount of
 #         training data (shakedir = "shakespeare/t*.txt" for example)
 #
-SEQLEN = 30
-BATCHSIZE = 200
+SEQLEN = 50
+BATCHSIZE = 256
 ALPHASIZE = txt.ALPHASIZE
 INTERNALSIZE = 512
-NLAYERS = 3
+NLAYERS = 4
 learning_rate = 0.001  # fixed learning rate
 dropout_pkeep = 0.8    # some dropout
 
@@ -135,7 +135,7 @@ sess.run(init)
 step = 0
 
 # training loop
-for x, y_, epoch in txt.rnn_minibatch_sequencer(codetext, BATCHSIZE, SEQLEN, nb_epochs=10):
+for x, y_, epoch in txt.rnn_minibatch_sequencer(codetext, BATCHSIZE, SEQLEN, nb_epochs=20):
 
     # train on one minibatch
     feed_dict = {X: x, Y_: y_, Hin: istate, lr: learning_rate, pkeep: dropout_pkeep, batchsize: BATCHSIZE}
@@ -188,6 +188,9 @@ for x, y_, epoch in txt.rnn_minibatch_sequencer(codetext, BATCHSIZE, SEQLEN, nb_
     # loop state around
     istate = ostate
     step += BATCHSIZE * SEQLEN
+
+print("Saved file: " + saved_file)
+
 
 # all runs: SEQLEN = 30, BATCHSIZE = 100, ALPHASIZE = 98, INTERNALSIZE = 512, NLAYERS = 3
 # run 1477669632 decaying learning rate 0.001-0.0001-1e7 dropout 0.5: not good
