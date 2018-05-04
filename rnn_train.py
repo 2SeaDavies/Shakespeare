@@ -1,17 +1,4 @@
-# encoding: UTF-8
-# Copyright 2017 Google.com
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+
 
 import tensorflow as tf
 from tensorflow.contrib import layers
@@ -21,33 +8,21 @@ import time
 import math
 import numpy as np
 import my_txtutils as txt
-tf.set_random_seed(0)
 
-# model parameters
-#
-# Usage:
-#   Training only:
-#         Leave all the parameters as they are
-#         Disable validation to run a bit faster (set validation=False below)
-#         You can follow progress in Tensorboard: tensorboard --log-dir=log
-#   Training and experimentation (default):
-#         Keep validation enabled
-#         You can now play with the parameters anf follow the effects in Tensorboard
-#         A good choice of parameters ensures that the testing and validation curves stay close
-#         To see the curves drift apart ("overfitting") try to use an insufficient amount of
-#         training data (shakedir = "shakespeare/t*.txt" for example)
+tf.set_random_seed(0)
+start = time.time()
+
 #
 SEQLEN = 50
 BATCHSIZE = 256
 ALPHASIZE = txt.ALPHASIZE
 INTERNALSIZE = 512
-NLAYERS = 4
+NLAYERS = 5
 learning_rate = 0.001  # fixed learning rate
 dropout_pkeep = 0.8    # some dropout
 
 # load data, either shakespeare, or the Python source of Tensorflow itself
 shakedir = "shakespeare/*.txt"
-#shakedir = "../tensorflow/**/*.py"
 codetext, valitext, bookranges = txt.read_data_files(shakedir, validation=True)
 
 # display some stats on the data
@@ -135,7 +110,7 @@ sess.run(init)
 step = 0
 
 # training loop
-for x, y_, epoch in txt.rnn_minibatch_sequencer(codetext, BATCHSIZE, SEQLEN, nb_epochs=20):
+for x, y_, epoch in txt.rnn_minibatch_sequencer(codetext, BATCHSIZE, SEQLEN, nb_epochs=10):
 
     # train on one minibatch
     feed_dict = {X: x, Y_: y_, Hin: istate, lr: learning_rate, pkeep: dropout_pkeep, batchsize: BATCHSIZE}
@@ -148,10 +123,7 @@ for x, y_, epoch in txt.rnn_minibatch_sequencer(codetext, BATCHSIZE, SEQLEN, nb_
         txt.print_learning_learned_comparison(x, y, l, bookranges, bl, acc, epoch_size, step, epoch)
         summary_writer.add_summary(smm, step)
 
-    # run a validation step every 50 batches
-    # The validation text should be a single sequence but that's too slow (1s per 1024 chars!),
-    # so we cut it up and batch the pieces (slightly inaccurate)
-    # tested: validating with 5K sequences instead of 1K is only slightly more accurate, but a lot slower.
+
     if step % _50_BATCHES == 0 and len(valitext) > 0:
         VALI_SEQLEN = 1*1024  # Sequence length for validation. State will be wrong at the start of each sequence.
         bsize = len(valitext) // VALI_SEQLEN
@@ -178,7 +150,7 @@ for x, y_, epoch in txt.rnn_minibatch_sequencer(codetext, BATCHSIZE, SEQLEN, nb_
         txt.print_text_generation_footer()
 
     # save a checkpoint (every 500 batches)
-    if step // 10 % _50_BATCHES == 0:
+    if step // 15 % _50_BATCHES == 0:
         saved_file = saver.save(sess, 'checkpoints/rnn_train_' + timestamp, global_step=step)
         print("Saved file: " + saved_file)
 
@@ -188,7 +160,12 @@ for x, y_, epoch in txt.rnn_minibatch_sequencer(codetext, BATCHSIZE, SEQLEN, nb_
     # loop state around
     istate = ostate
     step += BATCHSIZE * SEQLEN
+    print (time.time())
 
+txt.print_learning_learned_comparison(x, y, l, bookranges, bl, acc, epoch_size, step, epoch)
+end = time.time()
 saved_file = saver.save(sess, 'checkpoints/rnn_train_' + timestamp, global_step=step)
 print("Saved file: " + saved_file)
+print(end - start)
+
 
