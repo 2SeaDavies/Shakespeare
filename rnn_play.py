@@ -19,7 +19,7 @@ import my_txtutils
 
 # these must match what was saved !
 ALPHASIZE = my_txtutils.ALPHASIZE
-NLAYERS = 5
+NLAYERS = 4
 INTERNALSIZE = 512
 #a new commit
 
