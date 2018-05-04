@@ -31,7 +31,7 @@ SEQLEN = 50
 BATCHSIZE = 256
 ALPHASIZE = txt.ALPHASIZE
 INTERNALSIZE = 512
-NLAYERS = 5
+NLAYERS = 4
 learning_rate = 0.001  # fixed learning rate
 dropout_pkeep = 0.8    # some dropout
 
